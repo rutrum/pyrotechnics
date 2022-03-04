@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
-  "version": "${version}",
+  "id": "pyrotechnics",
+  "version": "0.0.1",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Pyrotechnics",
+  "description": "Crafting block for making rockets...and a new villager type!",
   "authors": [
-    "Me!"
+    "rutrum"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
+    "homepage": "",
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/pyrotechnics/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "net.rutrum.pyrotechnics.Pyrotechnics"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "pyrotechnics.mixins.json"
   ],
 
   "depends": {
