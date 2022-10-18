@@ -13,7 +13,7 @@ import net.minecraft.util.registry.Registry;
 
 public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
 
-    protected final Inventory input = new SimpleInventory(2){
+    protected final Inventory input = new SimpleInventory(3){
         @Override
         public void markDirty() {
             super.markDirty();
@@ -37,10 +37,9 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         this.addSlot(new Slot(input, 1, 52, 32));
         this.addSlot(new Slot(input, 2, 52, 54));
         this.addSlot(new Slot(result, 0, 110, 31) {
-
             @Override
-            public boolean canTakeItems(PlayerEntity playerEntity) {
-                return true; // TODO: not implemented
+            public void onTakeItem(PlayerEntity player, ItemStack stack) {
+                FireworkAssemblyTableScreenHandler.this.onTakeOutput(player, stack);
             }
 
             @Override
@@ -67,24 +66,45 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         }
     }
 
+    // Called by `result` slot to remove items from `input` inventory
+    private void onTakeOutput(PlayerEntity player, ItemStack stack) {
+        stack.onCraft(player.world, player, stack.getCount());
+        // this.result.unlockLastRecipe(player);
+        this.decrementStack(0);
+        this.decrementStack(1);
+        //this.context.run((world, pos) -> world.syncWorldEvent(WorldEvents.SMITHING_TABLE_USED, (BlockPos)pos, 0));
+    }
+    
+    // Copied from smithing screen, removes a single item from a slot number of `input`
+    private void decrementStack(int slot) {
+        ItemStack itemStack = this.input.getStack(slot);
+        itemStack.decrement(1);
+        this.input.setStack(slot, itemStack);
+    }
+
+    // Called when player closes the GUI.  TODO: DESTROYS INVENTORY
     @Override
     public void close(PlayerEntity player) {
-        super.close(player); // TODO: doenst work
+        super.close(player);
         this.context.run((world, pos) -> this.dropInventory(player, this.input));
     }
 
+    // Called by inventory (called `input`) to update the `result` stack
     @Override
     public void onContentChanged(Inventory inventory) {
         super.onContentChanged(inventory);
         if (inventory == this.input) {
             System.out.println(this.input.getStack(0));
-            if (this.input.getStack(0).isOf(Registry.ITEM.get(new Identifier("minecraft", "paper")))) {
-                System.out.println("Its paper!  Set result to cobblestone");
-                this.result.setStack(0, new ItemStack(Registry.ITEM.get(new Identifier("minecraft", "cobblestone"))));
+            if (
+                this.input.getStack(0).isOf(Registry.ITEM.get(new Identifier("minecraft", "paper")))
+                && this.input.getStack(1).isOf(Registry.ITEM.get(new Identifier("minecraft", "gunpowder")))
+            ) {
+                this.result.setStack(0, new ItemStack(Registry.ITEM.get(new Identifier("minecraft", "firework_rocket"))));
             }
         }
     }
 
+    // Boilerplate code for handling shift-clicking functionality.
     @Override
     public ItemStack transferSlot(PlayerEntity player, int invSlot) {
         ItemStack newStack = ItemStack.EMPTY;
