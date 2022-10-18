@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": { "model": "pyrotechnics:block/firework_assembly_table" }
+    }
+}

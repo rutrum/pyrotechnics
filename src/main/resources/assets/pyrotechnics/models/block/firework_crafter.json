@@ -1,6 +1,0 @@
-{
-    "parent": "block/cube_all",
-    "textures": {
-        "all": "pyrotechnics:block/firework_crafter"
-    }
-}

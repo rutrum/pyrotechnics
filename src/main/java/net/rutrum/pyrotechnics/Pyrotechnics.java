@@ -3,7 +3,7 @@ package net.rutrum.pyrotechnics;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
@@ -20,20 +20,23 @@ public class Pyrotechnics implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("pyrotechnics");
 
-	public static final FireworkCrafterBlock FIREWORK_CRAFTER = new FireworkCrafterBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f));
-    
-    public static final ScreenHandlerType<FireworkCraftingScreenHandler> FIREWORK_CRAFTER_SCREEN_HANDLER 
-		= ScreenHandlerRegistry.registerExtended(new Identifier("pyrotechnics", "firework_crafter"), FireworkCraftingScreenHandler::new);
+	public static final String MODID = "pyrotechnics";
+
+	public static final FireworkAssemblyTableBlock FIREWORK_ASSEMBLY_TABLE = new FireworkAssemblyTableBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f));
+
+	public static final ScreenHandlerType<FireworkAssemblyTableScreenHandler> FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE
+        = Registry.register(Registry.SCREEN_HANDLER, new Identifier(MODID, "firework_assembly_table"), new ScreenHandlerType<>(FireworkAssemblyTableScreenHandler::new));
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+		LOGGER.debug("Hello Fabric world!");
 
-		LOGGER.info("Hello Fabric world!");
-		Registry.register(Registry.BLOCK, new Identifier("pyrotechnics", "firework_crafter"), FIREWORK_CRAFTER);
-		Registry.register(Registry.ITEM, new Identifier("pyrotechnics", "firework_crafter"), new BlockItem(FIREWORK_CRAFTER, new FabricItemSettings().group(ItemGroup.MISC)));
+		registerBlock("firework_assembly_table", FIREWORK_ASSEMBLY_TABLE);
+	}
 
+	private void registerBlock(String name, Block block) {
+		Identifier id = new Identifier(MODID, name);
+		Registry.register(Registry.BLOCK, id, block);
+		Registry.register(Registry.ITEM, id, new BlockItem(block, new FabricItemSettings().group(ItemGroup.MISC)));
 	}
 }
