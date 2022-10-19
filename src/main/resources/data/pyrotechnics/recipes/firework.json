@@ -1,0 +1,12 @@
+{
+    "type": "pyrotechnics:firework_assembly",
+    "paper": {
+        "item": "minecraft:paper"
+    },
+    "gunpowder": {
+        "item": "minecraft:gunpowder"
+    },
+    "result": {
+        "item": "minecraft:firework_rocket"
+    }
+}

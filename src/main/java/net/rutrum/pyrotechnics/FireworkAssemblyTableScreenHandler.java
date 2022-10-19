@@ -1,5 +1,7 @@
 package net.rutrum.pyrotechnics;
 
+import java.util.List;
+
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -8,8 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
 
@@ -21,6 +22,7 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         }
     };
     protected final Inventory result = new SimpleInventory(1);
+    private final World world;
     protected final ScreenHandlerContext context;
 
     public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory) {
@@ -31,12 +33,13 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         super(Pyrotechnics.FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE, syncId);
 
         this.context = context;
+        this.world = playerInventory.player.world;
 
         input.onOpen(playerInventory.player);
         this.addSlot(new Slot(input, 0, 52, 10));
         this.addSlot(new Slot(input, 1, 52, 32));
         this.addSlot(new Slot(input, 2, 52, 54));
-        this.addSlot(new Slot(result, 0, 110, 31) {
+        this.addSlot(new Slot(result, 0, 110, 32) {
             @Override
             public void onTakeItem(PlayerEntity player, ItemStack stack) {
                 FireworkAssemblyTableScreenHandler.this.onTakeOutput(player, stack);
@@ -94,12 +97,14 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
     public void onContentChanged(Inventory inventory) {
         super.onContentChanged(inventory);
         if (inventory == this.input) {
-            System.out.println(this.input.getStack(0));
-            if (
-                this.input.getStack(0).isOf(Registry.ITEM.get(new Identifier("minecraft", "paper")))
-                && this.input.getStack(1).isOf(Registry.ITEM.get(new Identifier("minecraft", "gunpowder")))
-            ) {
-                this.result.setStack(0, new ItemStack(Registry.ITEM.get(new Identifier("minecraft", "firework_rocket"))));
+            List<FireworkAssemblyRecipe> list = this.world.getRecipeManager().getAllMatches(Pyrotechnics.FIREWORK_ASSEMBLY_RECIPE_TYPE, this.input, this.world);
+
+            System.out.println(list);
+            if (list.isEmpty()) {
+                this.result.setStack(0, ItemStack.EMPTY);
+            } else {
+                ItemStack itemStack = list.get(0).craft(this.input);
+                this.result.setStack(0, itemStack);
             }
         }
     }

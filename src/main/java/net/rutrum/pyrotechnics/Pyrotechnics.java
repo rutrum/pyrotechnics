@@ -1,5 +1,8 @@
 package net.rutrum.pyrotechnics;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -7,12 +10,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.RecipeType;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Pyrotechnics implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -26,6 +28,16 @@ public class Pyrotechnics implements ModInitializer {
 
 	public static final ScreenHandlerType<FireworkAssemblyTableScreenHandler> FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE
         = Registry.register(Registry.SCREEN_HANDLER, new Identifier(MODID, "firework_assembly_table"), new ScreenHandlerType<>(FireworkAssemblyTableScreenHandler::new));
+
+	public static final RecipeType<FireworkAssemblyRecipe> FIREWORK_ASSEMBLY_RECIPE_TYPE
+		= Registry.register(Registry.RECIPE_TYPE, new Identifier(MODID, "firework_assembly"), new RecipeType<FireworkAssemblyRecipe>(){
+            public String toString() {
+                return "firework_assembly";
+            }
+        });
+
+	public static final RecipeSerializer<FireworkAssemblyRecipe> FIREWORK_ASSEMBLY_RECIPE_SERIALIZER
+		= Registry.register(Registry.RECIPE_SERIALIZER, new Identifier(MODID, "firework_assembly"), new FireworkAssemblyRecipe.Serializer());
 
 	@Override
 	public void onInitialize() {
