@@ -6,6 +6,9 @@
     "gunpowder": {
         "item": "minecraft:gunpowder"
     },
+    "firework_star": {
+        "item": "minecraft:firework_star"
+    },
     "result": {
         "count": 3,
         "item": "minecraft:firework_rocket"

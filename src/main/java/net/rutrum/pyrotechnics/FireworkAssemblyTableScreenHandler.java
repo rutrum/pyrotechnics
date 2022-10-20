@@ -120,7 +120,6 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
             List<FireworkAssemblyRecipe> list = this.world.getRecipeManager()
                 .getAllMatches(Pyrotechnics.FIREWORK_ASSEMBLY_RECIPE_TYPE, this.input, this.world);
 
-            System.out.println(list);
             if (list.isEmpty()) {
                 this.result.setStack(0, ItemStack.EMPTY);
             } else {

@@ -37,12 +37,10 @@ public class FireworkAssemblyRecipe implements Recipe<Inventory> {
     @Override
     public boolean matches(Inventory inventory, World world) {
         boolean match_paper = this.paper.test(inventory.getStack(0));
-        System.out.println("paper " + match_paper);
         boolean match_gunpowder = this.gunpowder.test(inventory.getStack(1));
-        System.out.println("gunpowder " + match_gunpowder);
-        // boolean match_star = this.star.test(inventory.getStack(2));
-        boolean match_star = Ingredient.ofItems(Items.FIREWORK_STAR).test(inventory.getStack(2));
-        System.out.println("star " + match_star);
+        boolean match_star = Ingredient.ofItems(Items.FIREWORK_STAR).test(inventory.getStack(2)) 
+            || inventory.getStack(2).isEmpty();
+
         return match_gunpowder && match_paper && match_star;
     }
 
@@ -52,8 +50,12 @@ public class FireworkAssemblyRecipe implements Recipe<Inventory> {
         NbtCompound fireworksNbt = fireworks.getOrCreateSubNbt("Fireworks");
         NbtList nbtList = new NbtList();
 
-        NbtCompound explosion = inventory.getStack(2).getSubNbt("Explosion");
-        if (explosion != null) nbtList.add(explosion);
+        ItemStack starStack = inventory.getStack(2);
+
+        if (starStack != null) {
+            NbtCompound explosion = starStack.getSubNbt("Explosion");
+            if (explosion != null) nbtList.add(explosion);
+        }
 
         int totalGunpowder = inventory.getStack(1).getCount();
         int duration = totalGunpowder > 3 ? 3 : totalGunpowder; 
@@ -64,32 +66,6 @@ public class FireworkAssemblyRecipe implements Recipe<Inventory> {
         fireworksNbt.putByte("Flight", (byte)duration);
         return fireworks;
     }
-
-    /*
-    @Override
-    public ItemStack craft(CraftingInventory craftingInventory) {
-        ItemStack fireworks = new ItemStack(Items.FIREWORK_ROCKET, 3);
-        NbtCompound fireworks_nbt = fireworks.getOrCreateSubNbt("Fireworks");
-        NbtList nbtList = new NbtList();
-        int i = 0;
-        for (int j = 0; j < craftingInventory.size(); ++j) {
-            NbtCompound nbtCompound2;
-            ItemStack current_stack = craftingInventory.getStack(j);
-            if (current_stack.isEmpty()) continue;
-            if (DURATION_MODIFIER.test(current_stack)) {
-                ++i;
-                continue;
-            }
-            if (!FIREWORK_STAR.test(current_stack) || (nbtCompound2 = current_stack.getSubNbt("Explosion")) == null) continue;
-            nbtList.add(nbtCompound2);
-        }
-        fireworks_nbt.putByte("Flight", (byte)i);
-        if (!nbtList.isEmpty()) {
-            fireworks_nbt.put("Explosions", nbtList);
-        }
-        return fireworks;
-    }
-    */
 
     // docs say only relevant to recipe book
     @Override
