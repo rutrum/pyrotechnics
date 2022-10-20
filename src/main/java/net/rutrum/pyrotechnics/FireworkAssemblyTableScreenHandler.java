@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
@@ -36,9 +37,24 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         this.world = playerInventory.player.world;
 
         input.onOpen(playerInventory.player);
-        this.addSlot(new Slot(input, 0, 52, 10));
-        this.addSlot(new Slot(input, 1, 52, 32));
-        this.addSlot(new Slot(input, 2, 52, 54));
+        this.addSlot(new Slot(input, 0, 52, 10){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return stack.isOf(Items.PAPER);
+            }
+        });
+        this.addSlot(new Slot(input, 1, 52, 32){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return stack.isOf(Items.GUNPOWDER);
+            }
+        });
+        this.addSlot(new Slot(input, 2, 52, 54){
+            @Override
+            public boolean canInsert(ItemStack stack) {
+                return stack.isOf(Items.FIREWORK_STAR);
+            }
+        });
         this.addSlot(new Slot(result, 0, 110, 32) {
             @Override
             public void onTakeItem(PlayerEntity player, ItemStack stack) {
@@ -72,10 +88,14 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
     // Called by `result` slot to remove items from `input` inventory
     private void onTakeOutput(PlayerEntity player, ItemStack stack) {
         stack.onCraft(player.world, player, stack.getCount());
-        // this.result.unlockLastRecipe(player);
         this.decrementStack(0);
-        this.decrementStack(1);
-        //this.context.run((world, pos) -> world.syncWorldEvent(WorldEvents.SMITHING_TABLE_USED, (BlockPos)pos, 0));
+        int totalGunpowder = this.input.getStack(1).getCount();
+        int duration = totalGunpowder > 3 ? 3 : totalGunpowder; 
+
+        for (int i = 0; i < duration; i++) {
+            this.decrementStack(1);
+        }
+        this.decrementStack(2);
     }
     
     // Copied from smithing screen, removes a single item from a slot number of `input`
@@ -97,7 +117,8 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
     public void onContentChanged(Inventory inventory) {
         super.onContentChanged(inventory);
         if (inventory == this.input) {
-            List<FireworkAssemblyRecipe> list = this.world.getRecipeManager().getAllMatches(Pyrotechnics.FIREWORK_ASSEMBLY_RECIPE_TYPE, this.input, this.world);
+            List<FireworkAssemblyRecipe> list = this.world.getRecipeManager()
+                .getAllMatches(Pyrotechnics.FIREWORK_ASSEMBLY_RECIPE_TYPE, this.input, this.world);
 
             System.out.println(list);
             if (list.isEmpty()) {
