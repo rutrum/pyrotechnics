@@ -115,11 +115,11 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         this.input.setStack(slot, itemStack);
     }
 
-    // Called when player closes the GUI.  TODO: DESTROYS INVENTORY
+    // Called when player closes the GUI.
     @Override
     public void close(PlayerEntity player) {
         super.close(player);
-        this.context.run((world, pos) -> this.dropInventory(player, this.input));
+        this.dropInventory(player, input);
     }
 
     // Called by inventory (called `input`) to update the `result` stack

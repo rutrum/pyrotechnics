@@ -1,6 +1,5 @@
 package net.rutrum.pyrotechnics;
 
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -23,23 +22,22 @@ public class FireworkAssemblyTableBlock extends Block implements BlockEntityProv
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
             BlockHitResult hit) {
 
-        if (!world.isClient) {
-            // Get entity of location, could be null
-            BlockEntity entity = world.getBlockEntity(pos);
-
-            // Create a factory (constant function) that creates a new firework assembly table entity
-            NamedScreenHandlerFactory factory = ((FireworkAssemblyTableBlockEntity) entity);
-
-            // Block position could be null, technically
-            if (factory != null) {
-                player.openHandledScreen(factory);
-            }
+        if (world.isClient) {
+            return ActionResult.SUCCESS;
         }
 
-        //player.openHandledScreen(new ExtendedScreenHandlerFactory(
-        //    (syncId, inventory, p) -> new FireworkAssemblyTableScreenHandler(syncId, inventory, entity, ScreenHandlerContext.EMPTY), TITLE));
+        // Get entity of location, could be null
+        BlockEntity entity = world.getBlockEntity(pos);
 
-        return ActionResult.SUCCESS;
+        // Create a factory (constant function) that creates a new firework assembly table entity
+        NamedScreenHandlerFactory factory = ((FireworkAssemblyTableBlockEntity) entity);
+
+        // Block position could be null, technically
+        if (factory != null) {
+            player.openHandledScreen(factory);
+        }
+
+        return ActionResult.CONSUME;
     }
 
     @Override
