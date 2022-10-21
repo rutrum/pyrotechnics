@@ -2,7 +2,6 @@ package net.rutrum.pyrotechnics;
 
 import java.util.List;
 
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -43,25 +42,25 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         this.world = playerInventory.player.world;
 
         input.onOpen(playerInventory.player);
-        this.addSlot(new Slot(input, 0, 52, 10){
+        this.addSlot(new Slot(input, 0, 52, 17){
             @Override
             public boolean canInsert(ItemStack stack) {
                 return stack.isOf(Items.PAPER);
             }
         });
-        this.addSlot(new Slot(input, 1, 52, 32){
+        this.addSlot(new Slot(input, 1, 52, 39){
             @Override
             public boolean canInsert(ItemStack stack) {
                 return stack.isOf(Items.GUNPOWDER);
             }
         });
-        this.addSlot(new Slot(input, 2, 52, 54){
+        this.addSlot(new Slot(input, 2, 52, 61){
             @Override
             public boolean canInsert(ItemStack stack) {
                 return stack.isOf(Items.FIREWORK_STAR);
             }
         });
-        this.addSlot(new Slot(result, 0, 110, 32) {
+        this.addSlot(new Slot(result, 0, 110, 39) {
             @Override
             public void onTakeItem(PlayerEntity player, ItemStack stack) {
                 FireworkAssemblyTableScreenHandler.this.onTakeOutput(player, stack);
@@ -80,15 +79,20 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
     private void addPlayerInventory(PlayerInventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 91 + i * 18));
             }
         }
     }
 
     private void addPlayerHotbar(PlayerInventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 142));
+            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 149));
         }
+    } 
+    
+    // TODO: Do this instead of forcing stacks to be explicit items, this will help with recipes
+    public boolean canInsertIntoSlot(ItemStack stack, Slot slot) {
+        return true;
     }
 
     // Called by `result` slot to remove items from `input` inventory

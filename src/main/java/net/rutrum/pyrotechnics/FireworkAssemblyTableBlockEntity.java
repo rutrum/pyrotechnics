@@ -25,8 +25,7 @@ public class FireworkAssemblyTableBlockEntity extends BlockEntity implements Ext
 
     @Override
     public Text getDisplayName() {
-        System.out.println("Display name get!");
-        return Text.translatable("container.firework_assembly_table");
+        return Text.translatable("container.pyrotechnics.firework_assembly_table");
     }
 
     @Override

@@ -16,6 +16,10 @@ public class FireworkAssemblyTableScreen extends HandledScreen<FireworkAssemblyT
     public FireworkAssemblyTableScreen(FireworkAssemblyTableScreenHandler handler, 
             PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
+        
+        // My GUI is 7 pixels taller than default
+        this.backgroundHeight += 7;
+        this.playerInventoryTitleY += 7;
     }
 
     @Override
