@@ -7,7 +7,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -20,7 +19,7 @@ public class FireworkAssemblyTableBlockEntity extends BlockEntity implements Ext
 
     @Override
     public ScreenHandler createMenu(int syncId, PlayerInventory inventory, PlayerEntity player) {
-        return new FireworkAssemblyTableScreenHandler(syncId, inventory, this, ScreenHandlerContext.EMPTY);
+        return new FireworkAssemblyTableScreenHandler(syncId, inventory, this);
     }
 
     @Override

@@ -11,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
 
@@ -25,20 +24,17 @@ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
         }
     };
     final Inventory result = new SimpleInventory(1);
-    private final ScreenHandlerContext context;
     private final World world;
 
     public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
         this(syncId,
             playerInventory, 
-            playerInventory.player.getWorld().getBlockEntity(buf.readBlockPos()), // block entity
-            ScreenHandlerContext.EMPTY);
+            playerInventory.player.getWorld().getBlockEntity(buf.readBlockPos())); // block entity
     }
 
-    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, BlockEntity entity, ScreenHandlerContext context) {
+    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, BlockEntity entity) {
         super(Pyrotechnics.FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE, syncId);
 
-        this.context = context;
         this.world = playerInventory.player.world;
 
         input.onOpen(playerInventory.player);
