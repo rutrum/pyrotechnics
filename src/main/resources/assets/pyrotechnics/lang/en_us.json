@@ -1,3 +1,4 @@
 {
-    "block.pyrotechnics.firework_assembly_table": "Firework Crafter"
+    "block.pyrotechnics.firework_assembly_table": "Firework Assembly Table",
+    "container.pyrotechnics.firework_assembly_table": "Firework Assembly"
 }

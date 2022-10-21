@@ -2,12 +2,15 @@ package net.rutrum.pyrotechnics;
 
 import java.util.List;
 
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
@@ -15,22 +18,25 @@ import net.minecraft.world.World;
 
 public class FireworkAssemblyTableScreenHandler extends ScreenHandler {
 
-    protected final Inventory input = new SimpleInventory(3){
+    final Inventory input = new SimpleInventory(3){
         @Override
         public void markDirty() {
             super.markDirty();
             FireworkAssemblyTableScreenHandler.this.onContentChanged(this);
         }
     };
-    protected final Inventory result = new SimpleInventory(1);
+    final Inventory result = new SimpleInventory(1);
+    private final ScreenHandlerContext context;
     private final World world;
-    protected final ScreenHandlerContext context;
 
-    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
+    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+        this(syncId,
+            playerInventory, 
+            playerInventory.player.getWorld().getBlockEntity(buf.readBlockPos()), // block entity
+            ScreenHandlerContext.EMPTY);
     }
 
-    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, BlockEntity entity, ScreenHandlerContext context) {
         super(Pyrotechnics.FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE, syncId);
 
         this.context = context;

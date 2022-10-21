@@ -1,15 +1,36 @@
 package net.rutrum.pyrotechnics;
 
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-public class FireworkAssemblyTableBlockEntity extends BlockEntity {
+public class FireworkAssemblyTableBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory {
 
-    public FireworkAssemblyTableBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(type, pos, state);
-        //TODO Auto-generated constructor stub
+    public FireworkAssemblyTableBlockEntity(BlockPos pos, BlockState state) {
+        super(Pyrotechnics.FIREWORK_ASSEMBLY_TABLE_BLOCK_ENTITY_TYPE, pos, state);
     }
 
+    @Override
+    public ScreenHandler createMenu(int syncId, PlayerInventory inventory, PlayerEntity player) {
+        return new FireworkAssemblyTableScreenHandler(syncId, inventory, this, ScreenHandlerContext.EMPTY);
+    }
+
+    @Override
+    public Text getDisplayName() {
+        System.out.println("Display name get!");
+        return Text.translatable("container.firework_assembly_table");
+    }
+
+    @Override
+    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+        buf.writeBlockPos(this.pos);
+    }
 }

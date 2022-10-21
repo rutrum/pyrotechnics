@@ -1,0 +1,210 @@
+[1mdiff --git a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlock.java b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlock.java[m
+[1mindex d7e6c73..ac1febc 100644[m
+[1m--- a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlock.java[m
+[1m+++ b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlock.java[m
+[36m@@ -1,7 +1,9 @@[m
+ package net.rutrum.pyrotechnics;[m
+ [m
+ import net.minecraft.block.Block;[m
+[32m+[m[32mimport net.minecraft.block.BlockEntityProvider;[m
+ import net.minecraft.block.BlockState;[m
+[32m+[m[32mimport net.minecraft.block.entity.BlockEntity;[m
+ import net.minecraft.entity.player.PlayerEntity;[m
+ import net.minecraft.screen.ScreenHandlerContext;[m
+ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;[m
+[36m@@ -12,7 +14,7 @@[m [mimport net.minecraft.util.hit.BlockHitResult;[m
+ import net.minecraft.util.math.BlockPos;[m
+ import net.minecraft.world.World;[m
+ [m
+[31m-public class FireworkAssemblyTableBlock extends Block {[m
+[32m+[m[32mpublic class FireworkAssemblyTableBlock extends Block implements BlockEntityProvider {[m
+     private static final Text TITLE = Text.translatable("firework_assembly_table");[m
+ [m
+     public FireworkAssemblyTableBlock(Settings settings) {[m
+[36m@@ -22,12 +24,17 @@[m [mpublic class FireworkAssemblyTableBlock extends Block {[m
+     @Override[m
+     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,[m
+             BlockHitResult hit) {[m
+[32m+[m[32m        BlockEntity entity = world.getBlockEntity(pos);[m
+         if (world.isClient) {[m
+             return ActionResult.SUCCESS;[m
+         }[m
+         player.openHandledScreen(new SimpleNamedScreenHandlerFactory([m
+[31m-            (syncId, inventory, p) -> new FireworkAssemblyTableScreenHandler(syncId, inventory, ScreenHandlerContext.EMPTY[m
+[31m-            ), TITLE));[m
+[32m+[m[32m            (syncId, inventory, p) -> new FireworkAssemblyTableScreenHandler(syncId, inventory, entity, ScreenHandlerContext.EMPTY), TITLE));[m
+         return ActionResult.CONSUME;[m
+     }[m
+[32m+[m
+[32m+[m[32m    @Override[m
+[32m+[m[32m    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {[m
+[32m+[m[32m        return new FireworkAssemblyTableBlockEntity(pos, state);[m
+[32m+[m[32m    }[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlockEntity.java b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlockEntity.java[m
+[1mindex bdab7f6..1e79c6e 100644[m
+[1m--- a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlockEntity.java[m
+[1m+++ b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableBlockEntity.java[m
+[36m@@ -1,15 +1,38 @@[m
+ package net.rutrum.pyrotechnics;[m
+ [m
+[32m+[m[32mimport java.util.Optional;[m
+[32m+[m[32mimport java.util.function.BiFunction;[m
+[32m+[m
+ import net.minecraft.block.BlockState;[m
+ import net.minecraft.block.entity.BlockEntity;[m
+[31m-import net.minecraft.block.entity.BlockEntityType;[m
+[32m+[m[32mimport net.minecraft.entity.player.PlayerEntity;[m
+[32m+[m[32mimport net.minecraft.entity.player.PlayerInventory;[m
+[32m+[m[32mimport net.minecraft.screen.NamedScreenHandlerFactory;[m
+[32m+[m[32mimport net.minecraft.screen.ScreenHandler;[m
+[32m+[m[32mimport net.minecraft.screen.ScreenHandlerContext;[m
+[32m+[m[32mimport net.minecraft.text.Text;[m
+ import net.minecraft.util.math.BlockPos;[m
+[32m+[m[32mimport net.minecraft.world.World;[m
+[32m+[m
+[32m+[m[32mpublic class FireworkAssemblyTableBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ScreenHandlerContext {[m
+[32m+[m
+[32m+[m[32m    public FireworkAssemblyTableBlockEntity(BlockPos pos, BlockState state) {[m
+[32m+[m[32m        super(Pyrotechnics.FIREWORK_ASSEMBLY_TABLE_BLOCK_ENTITY_TYPE, pos, state);[m
+[32m+[m[32m    }[m
+ [m
+[31m-public class FireworkAssemblyTableBlockEntity extends BlockEntity {[m
+[32m+[m[32m    @Override[m
+[32m+[m[32m    public ScreenHandler createMenu(int syncId, PlayerInventory inventory, PlayerEntity player) {[m
+[32m+[m[32m        return new FireworkAssemblyTableScreenHandler(syncId, inventory, this, this);[m
+[32m+[m[32m    }[m
+ [m
+[31m-    public FireworkAssemblyTableBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {[m
+[31m-        super(type, pos, state);[m
+[31m-        //TODO Auto-generated constructor stub[m
+[32m+[m[32m    @Override[m
+[32m+[m[32m    public Text getDisplayName() {[m
+[32m+[m[32m        System.out.println("Display name get!");[m
+[32m+[m[32m        return Text.translatable("container.firework_assembly_table");[m
+     }[m
+ [m
+[32m+[m[32m    @Override[m
+[32m+[m[32m    public <T> Optional<T> get(BiFunction<World, BlockPos, T> getter) {[m
+[32m+[m[32m        return ScreenHandlerContext.EMPTY.get(getter);[m
+[32m+[m[32m    }[m
+ }[m
+[1mdiff --git a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreen.java b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreen.java[m
+[1mindex bf1aa99..4d6e986 100644[m
+[1m--- a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreen.java[m
+[1m+++ b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreen.java[m
+[36m@@ -13,8 +13,8 @@[m [mpublic class FireworkAssemblyTableScreen extends HandledScreen<FireworkAssemblyT[m
+ [m
+     private static final Identifier TEXTURE = new Identifier(Pyrotechnics.MODID, "textures/gui/firework_assembly_table.png");[m
+ [m
+[31m-    public FireworkAssemblyTableScreen(FireworkAssemblyTableScreenHandler handler, PlayerInventory inventory,[m
+[31m-            Text title) {[m
+[32m+[m[32m    public FireworkAssemblyTableScreen(FireworkAssemblyTableScreenHandler handler,[m[41m [m
+[32m+[m[32m            PlayerInventory inventory, Text title) {[m
+         super(handler, inventory, title);[m
+     }[m
+ [m
+[1mdiff --git a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreenHandler.java b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreenHandler.java[m
+[1mindex 9987d43..47da797 100644[m
+[1m--- a/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreenHandler.java[m
+[1m+++ b/src/main/java/net/rutrum/pyrotechnics/FireworkAssemblyTableScreenHandler.java[m
+[36m@@ -2,12 +2,14 @@[m [mpackage net.rutrum.pyrotechnics;[m
+ [m
+ import java.util.List;[m
+ [m
+[32m+[m[32mimport net.minecraft.block.entity.BlockEntity;[m
+ import net.minecraft.entity.player.PlayerEntity;[m
+ import net.minecraft.entity.player.PlayerInventory;[m
+ import net.minecraft.inventory.Inventory;[m
+ import net.minecraft.inventory.SimpleInventory;[m
+ import net.minecraft.item.ItemStack;[m
+ import net.minecraft.item.Items;[m
+[32m+[m[32mimport net.minecraft.network.PacketByteBuf;[m
+ import net.minecraft.screen.ScreenHandler;[m
+ import net.minecraft.screen.ScreenHandlerContext;[m
+ import net.minecraft.screen.slot.Slot;[m
+[36m@@ -15,22 +17,25 @@[m [mimport net.minecraft.world.World;[m
+ [m
+ public class FireworkAssemblyTableScreenHandler extends ScreenHandler {[m
+ [m
+[31m-    protected final Inventory input = new SimpleInventory(3){[m
+[32m+[m[32m    final Inventory input = new SimpleInventory(3){[m
+         @Override[m
+         public void markDirty() {[m
+             super.markDirty();[m
+             FireworkAssemblyTableScreenHandler.this.onContentChanged(this);[m
+         }[m
+     };[m
+[31m-    protected final Inventory result = new SimpleInventory(1);[m
+[32m+[m[32m    final Inventory result = new SimpleInventory(1);[m
+[32m+[m[32m    private final ScreenHandlerContext context;[m
+     private final World world;[m
+[31m-    protected final ScreenHandlerContext context;[m
+ [m
+[31m-    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory) {[m
+[31m-        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);[m
+[32m+[m[32m    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {[m
+[32m+[m[32m        this(syncId,[m[41m [m
+[32m+[m[32m            playerInventory,[m[41m [m
+[32m+[m[32m            playerInventory.player.getWorld().getBlockEntity(buf.readBlockPos()), // block entity[m
+[32m+[m[32m            ScreenHandlerContext.EMPTY);[m
+     }[m
+ [m
+[31m-    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {[m
+[32m+[m[32m    public FireworkAssemblyTableScreenHandler(int syncId, PlayerInventory playerInventory, BlockEntity entity, ScreenHandlerContext context) {[m
+         super(Pyrotechnics.FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE, syncId);[m
+ [m
+         this.context = context;[m
+[1mdiff --git a/src/main/java/net/rutrum/pyrotechnics/Pyrotechnics.java b/src/main/java/net/rutrum/pyrotechnics/Pyrotechnics.java[m
+[1mindex 0c6e21e..fc03bda 100644[m
+[1m--- a/src/main/java/net/rutrum/pyrotechnics/Pyrotechnics.java[m
+[1m+++ b/src/main/java/net/rutrum/pyrotechnics/Pyrotechnics.java[m
+[36m@@ -6,8 +6,10 @@[m [mimport org.slf4j.LoggerFactory;[m
+ import net.fabricmc.api.ModInitializer;[m
+ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;[m
+ import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;[m
+[32m+[m[32mimport net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;[m
+ import net.minecraft.block.Block;[m
+ import net.minecraft.block.Material;[m
+[32m+[m[32mimport net.minecraft.block.entity.BlockEntityType;[m
+ import net.minecraft.item.BlockItem;[m
+ import net.minecraft.item.ItemGroup;[m
+ import net.minecraft.recipe.RecipeSerializer;[m
+[36m@@ -26,6 +28,14 @@[m [mpublic class Pyrotechnics implements ModInitializer {[m
+ [m
+ 	public static final FireworkAssemblyTableBlock FIREWORK_ASSEMBLY_TABLE = new FireworkAssemblyTableBlock(FabricBlockSettings.of(Material.METAL).strength(4.0f));[m
+ [m
+[32m+[m	[32mpublic static final BlockEntityType<FireworkAssemblyTableBlockEntity> FIREWORK_ASSEMBLY_TABLE_BLOCK_ENTITY_TYPE[m[41m [m
+[32m+[m		[32m= Registry.register([m
+[32m+[m			[32mRegistry.BLOCK_ENTITY_TYPE,[m[41m [m
+[32m+[m			[32midentifier("firework_assembly_table"),[m
+[32m+[m			[32mFabricBlockEntityTypeBuilder.create([m
+[32m+[m				[32mFireworkAssemblyTableBlockEntity::new,[m
+[32m+[m				[32mFIREWORK_ASSEMBLY_TABLE).build(null));[m
+[32m+[m
+ 	public static final ScreenHandlerType<FireworkAssemblyTableScreenHandler> FIREWORK_ASSEMBLY_TABLE_SCREEN_HANDLER_TYPE[m
+         = Registry.register(Registry.SCREEN_HANDLER, new Identifier(MODID, "firework_assembly_table"), new ScreenHandlerType<>(FireworkAssemblyTableScreenHandler::new));[m
+ [m
+[36m@@ -46,6 +56,10 @@[m [mpublic class Pyrotechnics implements ModInitializer {[m
+ 		registerBlock("firework_assembly_table", FIREWORK_ASSEMBLY_TABLE);[m
+ 	}[m
+ [m
+[32m+[m	[32mprivate static Identifier identifier(String name) {[m
+[32m+[m		[32mreturn new Identifier(MODID, name);[m
+[32m+[m	[32m}[m
+[32m+[m
+ 	private void registerBlock(String name, Block block) {[m
+ 		Identifier id = new Identifier(MODID, name);[m
+ 		Registry.register(Registry.BLOCK, id, block);[m
+[1mdiff --git a/src/main/resources/assets/pyrotechnics/lang/en_us.json b/src/main/resources/assets/pyrotechnics/lang/en_us.json[m
+[1mindex 61714b5..e530051 100644[m
+[1m--- a/src/main/resources/assets/pyrotechnics/lang/en_us.json[m
+[1m+++ b/src/main/resources/assets/pyrotechnics/lang/en_us.json[m
+[36m@@ -1,3 +1,4 @@[m
+ {[m
+[31m-    "block.pyrotechnics.firework_assembly_table": "Firework Crafter"[m
+[32m+[m[32m    "block.pyrotechnics.firework_assembly_table": "Firework Assembly Table",[m
+[32m+[m[32m    "container.pyrotechnics.firework_assembly_table": "Firework Assembly"[m
+ }[m
+\ No newline at end of file[m

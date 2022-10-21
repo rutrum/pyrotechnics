@@ -13,8 +13,8 @@ public class FireworkAssemblyTableScreen extends HandledScreen<FireworkAssemblyT
 
     private static final Identifier TEXTURE = new Identifier(Pyrotechnics.MODID, "textures/gui/firework_assembly_table.png");
 
-    public FireworkAssemblyTableScreen(FireworkAssemblyTableScreenHandler handler, PlayerInventory inventory,
-            Text title) {
+    public FireworkAssemblyTableScreen(FireworkAssemblyTableScreenHandler handler, 
+            PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
     }
 
