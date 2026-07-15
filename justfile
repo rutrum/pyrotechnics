@@ -1,29 +1,31 @@
+# Pyrotechnics - a minecraft mod
+
 # Decompile minecraft
 gen:
     ./gradlew genSources
 
-# Create mod jar file
+# Build the mod jar
 build:
     ./gradlew build
-    ls build/libs/*.jar
+    ls -lh build/libs/*.jar
 
-# See version numbers on fabricmc.net
-versions:
-    firefox "https://fabricmc.net/develop/"
-
-# Reset mapping to dependencies, mapping in vscode
-fix:
-    ./gradlew --refresh-dependencies
-    ./gradlew vscode
-    echo "Reload build.gradle in vscode!!!"
-
-# Deletes the loom cache (source files)
-clean-loom:
-    trash .gradle/loom-cache
-
-# Runs minecraft with mod
+# Run Minecraft with the mod
 test:
     ./gradlew runClient
 
+# Clean build artifacts
 clean:
     ./gradlew clean
+
+# Enter nix dev shell (if not already in one)
+dev:
+    nix develop
+
+# Delete the loom cache (source files)
+clean-loom:
+    rm -rf .gradle/loom-cache
+
+# Git: add everything and commit
+commit m:
+    git add -A
+    git commit -m "{{m}}"

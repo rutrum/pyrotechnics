@@ -1,41 +1,37 @@
 {
-  "schemaVersion": 1,
-  "id": "pyrotechnics",
-  "version": "0.0.1",
-
-  "name": "Pyrotechnics",
-  "description": "Intuitive rocket crafting.",
-  "authors": [
-    "rutrum"
-  ],
-  "contact": {
-    "homepage": "",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
-  },
-
-  "license": "CC0-1.0",
-  "icon": "assets/pyrotechnics/icon.png",
-
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "net.rutrum.pyrotechnics.Pyrotechnics"
-    ],
-    "client": [
-      "net.rutrum.pyrotechnics.PyrotechnicsClient"
-    ]
-  },
-  "mixins": [
-    "pyrotechnics.mixins.json"
-  ],
-
-  "depends": {
-    "fabricloader": ">=0.12.12",
-    "fabric": "*",
-    "minecraft": "1.19.2",
-    "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
-  }
+	"schemaVersion": 1,
+	"id": "pyrotechnics",
+	"version": "${version}",
+	"name": "Pyrotechnics",
+	"description": "Intuitive firework crafting stations.",
+	"authors": [
+		"rutrum"
+	],
+	"contact": {
+		"sources": "https://github.com/rutrum/pyrotechnics"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/pyrotechnics/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.rutrum.pyrotechnics.Pyrotechnics"
+		],
+		"client": [
+			"net.rutrum.pyrotechnics.client.PyrotechnicsClient"
+		]
+	},
+	"mixins": [
+		"pyrotechnics.mixins.json",
+		{
+			"config": "pyrotechnics.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
 }

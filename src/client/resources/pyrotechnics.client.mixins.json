@@ -1,9 +1,9 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "net.rutrum.pyrotechnics.mixin",
+	"package": "net.rutrum.pyrotechnics.mixin.client",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": [],
+	"client": [],
 	"injectors": {
 		"defaultRequire": 1
 	}
