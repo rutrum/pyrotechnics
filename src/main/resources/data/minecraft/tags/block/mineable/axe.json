@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "pyrotechnics:color_vat",
+    "pyrotechnics:effect_bench",
+    "pyrotechnics:assembly_bench"
+  ]
+}
