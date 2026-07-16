@@ -2,5 +2,7 @@
   "block.pyrotechnics.assembly_bench": "Assembly Bench",
   "container.pyrotechnics.assembly_bench": "Assembly Bench",
   "block.pyrotechnics.effect_bench": "Effect Bench",
-  "container.pyrotechnics.effect_bench": "Effect Bench"
+  "container.pyrotechnics.effect_bench": "Effect Bench",
+  "block.pyrotechnics.color_vat": "Color Vat",
+  "container.pyrotechnics.color_vat": "Color Vat"
 }

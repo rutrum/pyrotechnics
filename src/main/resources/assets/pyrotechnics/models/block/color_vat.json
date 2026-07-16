@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "pyrotechnics:block/color_vat_top",
+    "side": "pyrotechnics:block/color_vat"
+  }
+}

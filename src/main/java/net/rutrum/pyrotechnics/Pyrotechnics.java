@@ -17,8 +17,11 @@ import net.rutrum.pyrotechnics.block.AssemblyBenchBlock;
 import net.rutrum.pyrotechnics.block.AssemblyBenchBlockEntity;
 import net.rutrum.pyrotechnics.block.EffectBenchBlock;
 import net.rutrum.pyrotechnics.block.EffectBenchBlockEntity;
+import net.rutrum.pyrotechnics.block.ColorVatBlock;
+import net.rutrum.pyrotechnics.block.ColorVatBlockEntity;
 import net.rutrum.pyrotechnics.screen.AssemblyBenchMenu;
 import net.rutrum.pyrotechnics.screen.EffectBenchMenu;
+import net.rutrum.pyrotechnics.screen.ColorVatMenu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +80,32 @@ public class Pyrotechnics implements ModInitializer {
 		BuiltInRegistries.MENU,
 		Identifier.fromNamespaceAndPath(MOD_ID, "effect_bench"),
 		new MenuType<>(EffectBenchMenu::new, FeatureFlags.DEFAULT_FLAGS)
+	);
+
+	// ===== Color Vat =====
+
+	public static final ColorVatBlock COLOR_VAT = Registry.register(
+		BuiltInRegistries.BLOCK,
+		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
+		new ColorVatBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).strength(2.5f))
+	);
+
+	public static final BlockItem COLOR_VAT_ITEM = Registry.register(
+		BuiltInRegistries.ITEM,
+		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
+		new BlockItem(COLOR_VAT, new Item.Properties())
+	);
+
+	public static final BlockEntityType<ColorVatBlockEntity> COLOR_VAT_BLOCK_ENTITY = Registry.register(
+		BuiltInRegistries.BLOCK_ENTITY_TYPE,
+		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
+		FabricBlockEntityTypeBuilder.create(ColorVatBlockEntity::new, COLOR_VAT).build()
+	);
+
+	public static final MenuType<ColorVatMenu> COLOR_VAT_MENU = Registry.register(
+		BuiltInRegistries.MENU,
+		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
+		new MenuType<>(ColorVatMenu::new, FeatureFlags.DEFAULT_FLAGS)
 	);
 
 	@Override

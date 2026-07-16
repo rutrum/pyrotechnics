@@ -6,11 +6,13 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.rutrum.pyrotechnics.Pyrotechnics;
 import net.rutrum.pyrotechnics.client.screen.AssemblyBenchScreen;
 import net.rutrum.pyrotechnics.client.screen.EffectBenchScreen;
+import net.rutrum.pyrotechnics.client.screen.ColorVatScreen;
 
 public class PyrotechnicsClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		MenuScreens.register(Pyrotechnics.ASSEMBLY_BENCH_MENU, AssemblyBenchScreen::new);
 		MenuScreens.register(Pyrotechnics.EFFECT_BENCH_MENU, EffectBenchScreen::new);
+		MenuScreens.register(Pyrotechnics.COLOR_VAT_MENU, ColorVatScreen::new);
 	}
 }
