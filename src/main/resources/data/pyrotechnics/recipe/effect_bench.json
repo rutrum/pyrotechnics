@@ -1,0 +1,1 @@
+{"block.effect_bench": {"pattern": ["SFS","PIP","PPP"],"key": {"S": "minecraft:stone","F": "minecraft:feather","P": "#minecraft:planks","I": "minecraft:iron_ingot"},"type": "minecraft:crafting_shaped","result": {"id": "pyrotechnics:effect_bench","count": 1},"show_notification": false}}
