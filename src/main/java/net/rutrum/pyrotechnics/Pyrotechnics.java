@@ -2,6 +2,7 @@ package net.rutrum.pyrotechnics;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -121,6 +122,14 @@ public class Pyrotechnics implements ModInitializer {
 
 		// Register resource condition for recipe removal
 		RemoveRecipesCondition.register();
+
+		// Add blocks to creative tab
+		CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.FUNCTIONAL_BLOCKS)
+			.register(output -> {
+				output.accept(COLOR_VAT);
+				output.accept(EFFECT_BENCH);
+				output.accept(ASSEMBLY_BENCH);
+			});
 
 		LOGGER.info("Pyrotechnics initialized");
 	}
