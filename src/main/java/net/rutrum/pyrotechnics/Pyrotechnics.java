@@ -13,11 +13,17 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.Blocks;
 
+import net.rutrum.pyrotechnics.config.PyrotechnicsConfig;
+import net.rutrum.pyrotechnics.config.RemoveRecipesCondition;
 import net.rutrum.pyrotechnics.block.AssemblyBenchBlock;
 import net.rutrum.pyrotechnics.block.AssemblyBenchBlockEntity;
 import net.rutrum.pyrotechnics.block.EffectBenchBlock;
 import net.rutrum.pyrotechnics.block.EffectBenchBlockEntity;
 import net.rutrum.pyrotechnics.block.ColorVatBlock;
+import net.rutrum.pyrotechnics.block.ColorVatBlockEntity;
+import net.rutrum.pyrotechnics.screen.AssemblyBenchMenu;
+import net.rutrum.pyrotechnics.screen.EffectBenchMenu;
+import net.rutrum.pyrotechnics.screen.ColorVatMenu;
 import net.rutrum.pyrotechnics.block.ColorVatBlockEntity;
 import net.rutrum.pyrotechnics.screen.AssemblyBenchMenu;
 import net.rutrum.pyrotechnics.screen.EffectBenchMenu;
@@ -110,6 +116,12 @@ public class Pyrotechnics implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		// Load config (generates default if missing)
+		PyrotechnicsConfig.getInstance();
+
+		// Register resource condition for recipe removal
+		RemoveRecipesCondition.register();
+
 		LOGGER.info("Pyrotechnics initialized");
 	}
 }

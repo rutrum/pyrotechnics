@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:firework_rocket",
+    "minecraft:firework_rocket_simple",
+    "minecraft:firework_star",
+    "minecraft:firework_star_fade"
+  ],
+  "fabric:remove": [
+    "minecraft:firework_rocket",
+    "minecraft:firework_rocket_simple",
+    "minecraft:firework_star",
+    "minecraft:firework_star_fade"
+  ]
+}

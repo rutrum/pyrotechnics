@@ -1,0 +1,14 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "pyrotechnics:remove_recipes"
+    }
+  ],
+  "type": "minecraft:campfire_cooking",
+  "cookingtime": 1,
+  "experience": 0,
+  "ingredient": {
+    "item": "minecraft:barrier"
+  },
+  "result": "minecraft:barrier"
+}
