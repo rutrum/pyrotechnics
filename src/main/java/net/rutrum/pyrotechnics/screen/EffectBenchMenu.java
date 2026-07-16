@@ -237,6 +237,12 @@ public class EffectBenchMenu extends AbstractContainerMenu {
     }
 
     @Override
+    public void removed(Player player) {
+        super.removed(player);
+        this.clearContainer(player, container);
+    }
+
+    @Override
     public boolean stillValid(Player player) {
         return container.stillValid(player);
     }

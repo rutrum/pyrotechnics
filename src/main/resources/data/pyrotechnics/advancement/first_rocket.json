@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:adventure/root",
+  "criteria": {
+    "got_firework": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:firework_rocket"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.pyrotechnics.first_rocket.description"
+    },
+    "icon": {
+      "id": "minecraft:firework_rocket"
+    },
+    "title": {
+      "translate": "advancements.pyrotechnics.first_rocket.title"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "got_firework"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

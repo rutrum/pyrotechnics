@@ -4,5 +4,7 @@
   "block.pyrotechnics.effect_bench": "Effect Bench",
   "container.pyrotechnics.effect_bench": "Effect Bench",
   "block.pyrotechnics.color_vat": "Color Vat",
-  "container.pyrotechnics.color_vat": "Color Vat"
+  "container.pyrotechnics.color_vat": "Color Vat",
+  "advancements.pyrotechnics.first_rocket.title": "Up, Up, and Away!",
+  "advancements.pyrotechnics.first_rocket.description": "Craft your first firework rocket"
 }

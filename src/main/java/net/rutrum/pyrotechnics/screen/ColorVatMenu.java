@@ -16,7 +16,6 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.core.component.DataComponents;
 
 import net.rutrum.pyrotechnics.Pyrotechnics;
-import net.rutrum.pyrotechnics.block.ColorVatBlockEntity;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -71,11 +70,6 @@ public class ColorVatMenu extends AbstractContainerMenu {
         this.baseMaskData = addDataSlot(DataSlot.standalone());
         this.fadeMaskData = addDataSlot(DataSlot.standalone());
 
-        if (container instanceof ColorVatBlockEntity vat) {
-            baseMaskData.set(vat.getBaseMask());
-            fadeMaskData.set(vat.getFadeMask());
-        }
-
         // 4x4 dye grid (slots 0-15)
         for (int i = 0; i < 16; i++) {
             int col = i % 4;
@@ -125,15 +119,11 @@ public class ColorVatMenu extends AbstractContainerMenu {
         boolean isFade = (id & 0x100) != 0;
         if (slotIndex < 0 || slotIndex >= 16) return false;
 
-        if (container instanceof ColorVatBlockEntity vat) {
-            if (isFade) fadeMaskData.set(vat.toggleFade(slotIndex));
-            else baseMaskData.set(vat.toggleBase(slotIndex));
-        } else {
-            int mask = isFade ? fadeMaskData.get() : baseMaskData.get();
-            mask ^= (1 << slotIndex);
-            if (isFade) fadeMaskData.set(mask);
-            else baseMaskData.set(mask);
-        }
+        int mask = isFade ? fadeMaskData.get() : baseMaskData.get();
+        mask ^= (1 << slotIndex);
+        if (isFade) fadeMaskData.set(mask);
+        else baseMaskData.set(mask);
+
         slotsChanged(container);
         return true;
     }
@@ -148,10 +138,6 @@ public class ColorVatMenu extends AbstractContainerMenu {
             }
         }
 
-        if (container instanceof ColorVatBlockEntity vat) {
-            vat.setBaseMask(0);
-            vat.setFadeMask(0);
-        }
         baseMaskData.set(0);
         fadeMaskData.set(0);
         container.setChanged();
@@ -226,6 +212,12 @@ public class ColorVatMenu extends AbstractContainerMenu {
             else slot.setChanged();
         }
         return newStack;
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        this.clearContainer(player, container);
     }
 
     @Override

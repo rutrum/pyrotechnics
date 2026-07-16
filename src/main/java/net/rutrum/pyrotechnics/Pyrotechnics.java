@@ -1,7 +1,6 @@
 package net.rutrum.pyrotechnics;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -10,22 +9,14 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.Blocks;
 
 import net.rutrum.pyrotechnics.config.PyrotechnicsConfig;
 import net.rutrum.pyrotechnics.config.RemoveRecipesCondition;
 import net.rutrum.pyrotechnics.block.AssemblyBenchBlock;
-import net.rutrum.pyrotechnics.block.AssemblyBenchBlockEntity;
 import net.rutrum.pyrotechnics.block.EffectBenchBlock;
-import net.rutrum.pyrotechnics.block.EffectBenchBlockEntity;
 import net.rutrum.pyrotechnics.block.ColorVatBlock;
-import net.rutrum.pyrotechnics.block.ColorVatBlockEntity;
-import net.rutrum.pyrotechnics.screen.AssemblyBenchMenu;
-import net.rutrum.pyrotechnics.screen.EffectBenchMenu;
-import net.rutrum.pyrotechnics.screen.ColorVatMenu;
-import net.rutrum.pyrotechnics.block.ColorVatBlockEntity;
 import net.rutrum.pyrotechnics.screen.AssemblyBenchMenu;
 import net.rutrum.pyrotechnics.screen.EffectBenchMenu;
 import net.rutrum.pyrotechnics.screen.ColorVatMenu;
@@ -38,25 +29,16 @@ public class Pyrotechnics implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	// ===== Assembly Bench =====
-
 	public static final AssemblyBenchBlock ASSEMBLY_BENCH = Registry.register(
 		BuiltInRegistries.BLOCK,
 		Identifier.fromNamespaceAndPath(MOD_ID, "assembly_bench"),
 		new AssemblyBenchBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).strength(2.5f))
 	);
-
 	public static final BlockItem ASSEMBLY_BENCH_ITEM = Registry.register(
 		BuiltInRegistries.ITEM,
 		Identifier.fromNamespaceAndPath(MOD_ID, "assembly_bench"),
 		new BlockItem(ASSEMBLY_BENCH, new Item.Properties())
 	);
-
-	public static final BlockEntityType<AssemblyBenchBlockEntity> ASSEMBLY_BENCH_BLOCK_ENTITY = Registry.register(
-		BuiltInRegistries.BLOCK_ENTITY_TYPE,
-		Identifier.fromNamespaceAndPath(MOD_ID, "assembly_bench"),
-		FabricBlockEntityTypeBuilder.create(AssemblyBenchBlockEntity::new, ASSEMBLY_BENCH).build()
-	);
-
 	public static final MenuType<AssemblyBenchMenu> ASSEMBLY_BENCH_MENU = Registry.register(
 		BuiltInRegistries.MENU,
 		Identifier.fromNamespaceAndPath(MOD_ID, "assembly_bench"),
@@ -64,25 +46,16 @@ public class Pyrotechnics implements ModInitializer {
 	);
 
 	// ===== Effect Bench =====
-
 	public static final EffectBenchBlock EFFECT_BENCH = Registry.register(
 		BuiltInRegistries.BLOCK,
 		Identifier.fromNamespaceAndPath(MOD_ID, "effect_bench"),
 		new EffectBenchBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).strength(2.5f))
 	);
-
 	public static final BlockItem EFFECT_BENCH_ITEM = Registry.register(
 		BuiltInRegistries.ITEM,
 		Identifier.fromNamespaceAndPath(MOD_ID, "effect_bench"),
 		new BlockItem(EFFECT_BENCH, new Item.Properties())
 	);
-
-	public static final BlockEntityType<EffectBenchBlockEntity> EFFECT_BENCH_BLOCK_ENTITY = Registry.register(
-		BuiltInRegistries.BLOCK_ENTITY_TYPE,
-		Identifier.fromNamespaceAndPath(MOD_ID, "effect_bench"),
-		FabricBlockEntityTypeBuilder.create(EffectBenchBlockEntity::new, EFFECT_BENCH).build()
-	);
-
 	public static final MenuType<EffectBenchMenu> EFFECT_BENCH_MENU = Registry.register(
 		BuiltInRegistries.MENU,
 		Identifier.fromNamespaceAndPath(MOD_ID, "effect_bench"),
@@ -90,25 +63,16 @@ public class Pyrotechnics implements ModInitializer {
 	);
 
 	// ===== Color Vat =====
-
 	public static final ColorVatBlock COLOR_VAT = Registry.register(
 		BuiltInRegistries.BLOCK,
 		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
 		new ColorVatBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CRAFTING_TABLE).strength(2.5f))
 	);
-
 	public static final BlockItem COLOR_VAT_ITEM = Registry.register(
 		BuiltInRegistries.ITEM,
 		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
 		new BlockItem(COLOR_VAT, new Item.Properties())
 	);
-
-	public static final BlockEntityType<ColorVatBlockEntity> COLOR_VAT_BLOCK_ENTITY = Registry.register(
-		BuiltInRegistries.BLOCK_ENTITY_TYPE,
-		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
-		FabricBlockEntityTypeBuilder.create(ColorVatBlockEntity::new, COLOR_VAT).build()
-	);
-
 	public static final MenuType<ColorVatMenu> COLOR_VAT_MENU = Registry.register(
 		BuiltInRegistries.MENU,
 		Identifier.fromNamespaceAndPath(MOD_ID, "color_vat"),
@@ -117,13 +81,9 @@ public class Pyrotechnics implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// Load config (generates default if missing)
 		PyrotechnicsConfig.getInstance();
-
-		// Register resource condition for recipe removal
 		RemoveRecipesCondition.register();
 
-		// Add blocks to creative tab
 		CreativeModeTabEvents.modifyOutputEvent(net.minecraft.world.item.CreativeModeTabs.FUNCTIONAL_BLOCKS)
 			.register(output -> {
 				output.accept(COLOR_VAT);
