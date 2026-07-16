@@ -16,6 +16,7 @@
           nativeBuildInputs = with pkgs; [
             jdk25
             gradle_9
+            uv
           ];
 
           # Gradle needs to know where to find JDK 25
