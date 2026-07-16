@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "pyrotechnics:block/assembly_bench_top",
+    "side": "pyrotechnics:block/assembly_bench"
+  }
+}
