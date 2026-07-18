@@ -3,6 +3,7 @@ package net.rutrum.pyrotechnics.client.screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -59,14 +60,17 @@ public class ColorVatScreen extends AbstractContainerScreen<ColorVatMenu> {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractBackground(graphics, mouseX, mouseY, partialTick);
-
-        int x = (width - imageWidth) / 2;
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        int x = leftPos;
         int y = (height - imageHeight) / 2;
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0f, 0f, imageWidth, imageHeight, 176, 207);
+    }
 
-        // Draw the GUI container texture
-        graphics.blit(TEXTURE, x, y, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        int x = leftPos;
+        int y = topPos;
 
         // Draw colored swatches for each dye slot
         int baseMask = menu.getBaseMask();

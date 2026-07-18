@@ -2,6 +2,7 @@ package net.rutrum.pyrotechnics.client.screen;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,12 +20,11 @@ public class EffectBenchScreen extends AbstractContainerScreen<EffectBenchMenu> 
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        extractBackground(graphics, mouseX, mouseY, partialTick);
-        int x = (width - imageWidth) / 2;
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        int x = leftPos;
         int y = (height - imageHeight) / 2;
-        graphics.blit(TEXTURE, x, y, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight);
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0f, 0f, imageWidth, imageHeight, 176, 174);
     }
 
     @Override

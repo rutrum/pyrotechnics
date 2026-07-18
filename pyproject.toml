@@ -1,0 +1,8 @@
+[project]
+name = "pyrotechnics-textures"
+version = "0.1.0"
+description = "Texture generator for Pyrotechnics Minecraft mod"
+requires-python = ">=3.12"
+dependencies = [
+    "pillow>=11",
+]

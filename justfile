@@ -1,5 +1,8 @@
 # Pyrotechnics - a minecraft mod
 
+default:
+    just --list
+
 # Decompile minecraft
 gen:
     ./gradlew genSources

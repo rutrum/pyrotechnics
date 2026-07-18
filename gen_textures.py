@@ -1,269 +1,344 @@
-"""Generate block and GUI textures for Pyrotechnics mod."""
-import struct, zlib, math, random
+"""Generate block and GUI textures for Pyrotechnics Minecraft mod.
+
+Usage: uv run python3 gen_textures.py
+
+Scene description language:
+  Each GUI is described as a dict with "size" and "elements".
+  A render() function processes the scene and produces a PNG.
+
+Primitives:
+  - window       — fills bg with grey, draws outer bevel border
+  - slot         — 18×18 sunken slot at (x, y)
+  - output_slot  — 26×26 larger output slot at (x, y)
+  - slot_grid    — grid of slots (cols×rows, dx/dy spacing)
+  - arrow        — furnace-style progress arrow at (x, y)
+  - label        — text at (x, y)
+  - player_inv   — 3×9 + 1×9 hotbar slots starting at y_offset
+"""
+
 from PIL import Image, ImageDraw
+import math, random, os
 
 random.seed(42)
 
-# === Helpers ===
+# ── Vanilla colour palette ────────────────────────────────────────
+# Measured from assets/minecraft/textures/gui/container/crafting_table.png
+C = {
+    "bg":           (198, 198, 198),   # container background fill
+    "outer_light":  (255, 255, 255),   # top/left border bevel
+    "outer_dark":   ( 85,  85,  85),   # bottom/right border bevel
+    "inner_border": (139, 139, 139),   # band between border and slots
+    "slot_bg":      ( 55,  55,  55),   # dark slot interior
+    "slot_light":   ( 85,  85,  85),   # slot bevel top/left (sunken)
+    "slot_dark":    (139, 139, 139),   # slot bevel bottom/right
+}
 
-def wood_grain(size, base, dark, streak_color):
-    """Create a simple wood grain texture."""
-    img = Image.new('RGBA', (size, size))
-    pix = img.load()
-    for y in range(size):
-        for x in range(size):
-            noise = random.randint(-15, 15)
-            grain = int(8 * math.sin(y * 0.3 + x * 0.05))
-            v = base + noise + grain
-            v = max(0, min(255, v))
-            pix[x, y] = (v, v - 10, v - 20, 255)
+
+# ── Drawing helpers ────────────────────────────────────────────────
+
+def _hspan(img, x, y, w, color):
+    """Draw a horizontal 1‑px span."""
+    for dx in range(w):
+        img.putpixel((x + dx, y), color)
+
+
+def _vspan(img, x, y, h, color):
+    """Draw a vertical 1‑px span."""
+    for dy in range(h):
+        img.putpixel((x, y + dy), color)
+
+
+# ── Bevel box ──────────────────────────────────────────────────────
+
+def bevel_box(draw, x, y, w, h, top_left, bottom_right, fill=None):
+    """Draw a beveled rectangle (1‑px border, TL lighter, BR darker)."""
+    # Fill the interior (inside the border)
+    if fill:
+        draw.rectangle([x + 1, y + 1, x + w - 2, y + h - 2], fill=fill)
+    
+    # Draw full border rectangle (all 4 edges)
+    draw.rectangle([x, y, x + w - 1, y + h - 1], outline=top_left)
+    # Overwrite bottom and right edges with darker color
+    draw.line([(x, y + h - 1), (x + w - 1, y + h - 1)], fill=bottom_right, width=1)  # bottom
+    draw.line([(x + w - 1, y), (x + w - 1, y + h - 1)], fill=bottom_right, width=1)  # right
+    # Also need to fix bottom-left and top-right corners - draw them separately
+    draw.im.putpixel((x, y + h - 1), bottom_right)  # bottom-left corner
+    draw.im.putpixel((x + w - 1, y), bottom_right)  # top-right corner
+
+
+# ── Primitives ─────────────────────────────────────────────────────
+
+def window(draw, img, w, h):
+    """Fill background and draw outer container border."""
+    # Fill entire area with bg color
+    draw.rectangle([0, 0, w - 1, h - 1], fill=C["bg"])
+    # Draw outer bevel border (1px all around)
+    bevel_box(draw, 0, 0, w, h, C["outer_light"], C["outer_dark"])
+    # Inner border band (1px outline inside the outer border)
+    draw.rectangle([1, 1, w - 2, h - 2], outline=C["inner_border"])
+
+
+def slot(draw, img, x, y, w=18, h=18):
+    """Draw one sunken slot at (x, y) with size wxh."""
+    bevel_box(draw, x, y, w, h, C["slot_light"], C["slot_dark"], C["slot_bg"])
+
+
+def output_slot(draw, img, x, y):
+    """Draw a larger output slot (like furnace output)."""
+    slot(draw, img, x, y, w=26, h=26)
+
+
+def slot_grid(draw, img, x, y, cols, rows, dx=18, dy=18):
+    """Draw a grid of regular slots."""
+    for row in range(rows):
+        for col in range(cols):
+            slot(draw, img, x + col * dx, y + row * dy)
+
+
+def arrow(draw, img, x, y, filled=False):
+    """Draw a furnace‑style fuel/arrow indicator.
+    
+    Unfilled = empty arrow outline.
+    Filled   = solid arrow (for progress overlay).
+    """
+    # Arrow shape: 23×16 px bounding box
+    # Points: (0,4) → (14,4) → (14,0) → (22,8) → (14,16) → (14,12) → (0,12)
+    pts = [(0, 4), (14, 4), (14, 0), (22, 8), (14, 16), (14, 12), (0, 12)]
+    pts = [(x + px, y + py) for px, py in pts]
+    if filled:
+        draw.polygon(pts, fill=C["slot_bg"])
+    else:
+        draw.polygon(pts, outline=C["outer_dark"])
+
+
+def label(draw, img, x, y, text, color=(64, 64, 64)):
+    """Draw a text label."""
+    draw.text((x, y), text, fill=color)
+
+
+def player_inventory(draw, img, y_offset):
+    """Draw 3 rows of 9 slots + hotbar row at the given y offset."""
+    inv_x = 8  # matches Java slot positions
+    slot_grid(draw, img, inv_x, y_offset, cols=9, rows=3)
+    hotbar_y = y_offset + 3 * 18 + 4
+    # hotbar has a slightly different background
+    draw.rectangle([inv_x - 1, hotbar_y - 1, inv_x + 9 * 18 - 1, hotbar_y + 18 - 1],
+                   fill=C["inner_border"])
+    slot_grid(draw, img, inv_x, hotbar_y, cols=9, rows=1)
+
+
+# ── Render ─────────────────────────────────────────────────────────
+
+def render(scene):
+    """Produce a PIL Image from a scene description dict."""
+    w, h = scene["size"]
+    img = Image.new("RGBA", (w, h))
+    draw = ImageDraw.Draw(img)
+    for el in scene.get("elements", []):
+        t = el["type"]
+        if t == "window":
+            window(draw, img, w, h)
+        elif t == "slot":
+            slot(draw, img, el["x"], el["y"])
+        elif t == "output_slot":
+            output_slot(draw, img, el["x"], el["y"])
+        elif t == "slot_grid":
+            slot_grid(draw, img, el["x"], el["y"], el["cols"], el["rows"],
+                      el.get("dx", 18), el.get("dy", 18))
+        elif t == "arrow":
+            arrow(draw, img, el["x"], el["y"], el.get("filled", False))
+        elif t == "label":
+            label(draw, img, el["x"], el["y"], el["text"],
+                  el.get("color", (64, 64, 64)))
+        elif t == "player_inv":
+            player_inventory(draw, img, el["y"])
+        else:
+            raise ValueError(f"Unknown element type: {t}")
     return img
 
-def add_highlight(img, x, y, w, h, strength=30):
-    """Add a top-left highlight to a region."""
-    draw = ImageDraw.Draw(img)
-    for i in range(h):
-        for j in range(w):
-            r, g, b, a = img.getpixel((x+j, y+i))
-            fade = max(0, 1 - (i+j) / (w+h)) * strength
-            img.putpixel((x+j, y+i), (min(255, r+int(fade)), min(255, g+int(fade)), min(255, b+int(fade)), a))
 
-def add_shadow(img, x, y, w, h, strength=30):
-    """Add a bottom-right shadow to a region."""
-    draw = ImageDraw.Draw(img)
-    for i in range(h):
-        for j in range(w):
-            r, g, b, a = img.getpixel((x+j, y+i))
-            fade = max(0, (i+j) / (w+h)) * strength
-            img.putpixel((x+j, y+i), (max(0, r-int(fade)), max(0, g-int(fade)), max(0, b-int(fade)), a))
-
-# === Color Vat ===
+# ── Block textures (keep existing procedural ones) ────────────────
 
 def make_color_vat_top():
-    img = Image.new('RGBA', (16, 16))
+    img = Image.new("RGBA", (16, 16))
     pix = img.load()
-    # Wooden rim
     for y in range(16):
         for x in range(16):
             if x < 1 or x >= 15 or y < 1 or y >= 15:
-                # Rim
                 v = 120 + int(20 * math.sin(y * 0.5 + x * 0.3))
-                pix[x, y] = (v, v-10, v-20, 255)
+                pix[x, y] = (v, v - 10, v - 20, 255)
             elif x < 2 or x >= 14 or y < 2 or y >= 14:
-                # Inner rim
                 v = 100 + int(15 * math.sin(y * 0.7 + x * 0.4))
-                pix[x, y] = (v, v-8, v-15, 255)
+                pix[x, y] = (v, v - 8, v - 15, 255)
             else:
-                # Liquid - dark purple/red dye
-                dx, dy = x-8, y-8
-                dist = math.sqrt(dx*dx + dy*dy)
+                dx, dy = x - 8, y - 8
+                dist = math.sqrt(dx * dx + dy * dy)
                 r = int(80 + 30 * math.sin(dist * 1.5 + x * 0.2))
                 g = int(20 + 15 * math.sin(dist * 1.2 + y * 0.3))
                 b = int(100 + 40 * math.sin(dist * 1.8 + x * 0.1))
                 pix[x, y] = (r, g, b, 255)
-    # Highlights on rim
     draw = ImageDraw.Draw(img)
     draw.rectangle([0, 0, 15, 0], fill=(160, 140, 100, 255))
     draw.rectangle([0, 0, 0, 15], fill=(150, 130, 95, 255))
-    add_highlight(img, 2, 2, 12, 12, 20)
     return img
 
+
 def make_color_vat_side():
-    img = Image.new('RGBA', (16, 16))
+    img = Image.new("RGBA", (16, 16))
     pix = img.load()
-    # Vertical wooden planks
     for x in range(16):
         plank = x // 4
         for y in range(16):
             v = 130 + int(20 * math.sin(y * 0.5 + plank * 2))
             v += random.randint(-8, 8)
-            # Horizontal bands (metal rings)
-            if y in [3, 4, 12, 13]:
+            if y in (3, 4, 12, 13):
                 v = 90 + random.randint(-5, 5)
-            pix[x, y] = (v, v-10, v-20, 255)
-    # Dye stain on bottom
+            pix[x, y] = (v, v - 10, v - 20, 255)
     for x in range(16):
         for y in range(10, 16):
             r, g, b, a = img.getpixel((x, y))
             stain = (14 - y) * 8
-            pix[x, y] = (max(0, r-stain), max(0, g-stain//2), min(255, b+stain//2), 255)
-    # Metal ring highlights
+            pix[x, y] = (max(0, r - stain), max(0, g - stain // 2),
+                         min(255, b + stain // 2), 255)
     draw = ImageDraw.Draw(img)
     draw.rectangle([0, 3, 15, 3], fill=(110, 105, 95, 255))
     draw.rectangle([0, 12, 15, 12], fill=(110, 105, 95, 255))
     return img
 
-# === Effect Bench ===
 
 def make_effect_bench_top():
-    img = Image.new('RGBA', (16, 16))
+    img = Image.new("RGBA", (16, 16))
     pix = img.load()
-    # Wooden work surface
     for y in range(16):
         for x in range(16):
             v = 150 + int(25 * math.sin(y * 0.4 + x * 0.3))
             v += random.randint(-5, 5)
-            pix[x, y] = (v, v-8, v-18, 255)
-    # Darker tool marks / grooves
+            pix[x, y] = (v, v - 8, v - 18, 255)
     draw = ImageDraw.Draw(img)
-    # Cross groove
     draw.rectangle([7, 0, 8, 5], fill=(100, 88, 70, 255))
     draw.rectangle([7, 10, 8, 15], fill=(100, 88, 70, 255))
-    # Small circular indentations
-    for cx, cy in [(2, 2), (13, 2), (2, 13), (13, 13)]:
-        draw.ellipse([cx-1, cy-1, cx+1, cy+1], fill=(110, 95, 75, 255))
-    # Metal tool rest
+    for cx, cy in ((2, 2), (13, 2), (2, 13), (13, 13)):
+        draw.ellipse([cx - 1, cy - 1, cx + 1, cy + 1], fill=(110, 95, 75, 255))
     draw.rectangle([3, 6, 12, 9], fill=(130, 115, 95, 255))
     draw.rectangle([4, 7, 11, 8], fill=(100, 90, 75, 255))
-    add_highlight(img, 0, 0, 16, 16, 15)
     return img
 
+
 def make_effect_bench_side():
-    img = Image.new('RGBA', (16, 16))
+    img = Image.new("RGBA", (16, 16))
     pix = img.load()
-    # Drawer front look
     for y in range(16):
         for x in range(16):
             if 3 <= y <= 12:
-                # Drawer
                 v = 140 + int(15 * math.sin(y * 0.3 + x * 0.2))
             else:
-                # Frame
                 v = 120 + int(15 * math.sin(y * 0.5 + x * 0.3))
             v += random.randint(-5, 5)
-            pix[x, y] = (v, v-8, v-18, 255)
-    # Drawer handle
+            pix[x, y] = (v, v - 8, v - 18, 255)
     draw = ImageDraw.Draw(img)
     draw.rectangle([5, 6, 10, 7], fill=(90, 78, 60, 255))
     draw.rectangle([5, 9, 10, 10], fill=(90, 78, 60, 255))
-    add_highlight(img, 0, 0, 16, 16, 10)
     return img
 
-# === Assembly Bench ===
 
 def make_assembly_bench_top():
-    img = Image.new('RGBA', (16, 16))
+    img = Image.new("RGBA", (16, 16))
     pix = img.load()
-    # Lighter wood table
     for y in range(16):
         for x in range(16):
             v = 160 + int(20 * math.sin(y * 0.3 + x * 0.4))
             v += random.randint(-4, 4)
-            pix[x, y] = (v, v-6, v-15, 255)
-    # Paper area (lighter rectangle)
+            pix[x, y] = (v, v - 6, v - 15, 255)
     draw = ImageDraw.Draw(img)
     draw.rectangle([3, 2, 12, 7], fill=(220, 210, 190, 255))
     draw.rectangle([4, 3, 11, 6], fill=(240, 230, 210, 255))
-    # Gunpowder marks (small dark specks)
     for _ in range(6):
-        gx = random.randint(10, 14)
-        gy = random.randint(8, 12)
+        gx, gy = random.randint(10, 14), random.randint(8, 12)
         img.putpixel((gx, gy), (40, 35, 30, 255))
-    # Star placement area (circle)
     draw.ellipse([9, 10, 14, 15], fill=(180, 165, 140, 255))
     draw.ellipse([10, 11, 13, 14], fill=(200, 185, 160, 255))
-    add_highlight(img, 0, 0, 16, 16, 12)
     return img
 
+
 def make_assembly_bench_side():
-    img = Image.new('RGBA', (16, 16))
+    img = Image.new("RGBA", (16, 16))
     pix = img.load()
-    # Simple wood panel with legs
     for y in range(16):
         for x in range(16):
             if x < 2 or x >= 14:
-                # Leg area
                 v = 130 + int(10 * math.sin(y * 0.4))
             else:
-                # Panel
                 v = 145 + int(15 * math.sin(y * 0.3 + x * 0.2))
             v += random.randint(-5, 5)
-            pix[x, y] = (v, v-8, v-18, 255)
-    # Shelf
+            pix[x, y] = (v, v - 8, v - 18, 255)
     draw = ImageDraw.Draw(img)
     draw.rectangle([2, 8, 13, 9], fill=(120, 105, 85, 255))
-    add_highlight(img, 0, 0, 16, 16, 10)
     return img
 
-# === GUI Textures ===
 
-def make_gui(width, height, color, draw_fn):
-    """Create a GUI texture with a solid background and custom drawing."""
-    img = Image.new('RGBA', (width, height))
-    # Base background - dark wood
-    pix = img.load()
-    for y in range(height):
-        for x in range(width):
-            v = color[0] + random.randint(-8, 8)
-            img.putpixel((x, y), (v, v-6, v-12, 255))
-    draw_fn(ImageDraw.Draw(img), img)
-    return img
+# ── Scene definitions ──────────────────────────────────────────────
 
-def draw_color_vat_gui(draw, img):
-    w, h = img.size
-    # Slot area backgrounds (lighter insets)
-    for row in range(4):
-        for col in range(4):
-            sx, sy = 26 + col*18, 17 + row*18
-            draw.rectangle([sx, sy, sx+15, sy+15], fill=(60, 50, 40, 255))
-    # Gunpowder slot
-    draw.rectangle([26, 93, 41, 108], fill=(60, 50, 40, 255))
-    # Result slot
-    draw.rectangle([134, 53, 149, 68], fill=(60, 50, 40, 255))
-    # Labels area
-    draw.text((62, 78), "Base", fill=(180, 160, 130))
-    draw.text((110, 78), "Fade", fill=(180, 160, 130))
-    # Player inventory area
-    draw.rectangle([7, 124, 168, 206], fill=(50, 42, 35, 255))
-
-def draw_effect_bench_gui(draw, img):
-    w, h = img.size
-    # Star slot
-    draw.rectangle([44, 35, 59, 50], fill=(60, 50, 40, 255))
-    # Shape slot
-    draw.rectangle([26, 57, 41, 72], fill=(60, 50, 40, 255))
-    # Diamond slot
-    draw.rectangle([62, 57, 77, 72], fill=(60, 50, 40, 255))
-    # Glowstone slot
-    draw.rectangle([80, 57, 95, 72], fill=(60, 50, 40, 255))
-    # Result slot
-    draw.rectangle([134, 35, 149, 50], fill=(60, 50, 40, 255))
-    # Player inventory area
-    draw.rectangle([7, 83, 168, 165], fill=(50, 42, 35, 255))
-
-def draw_assembly_bench_gui(draw, img):
-    w, h = img.size
-    # Paper slot
-    draw.rectangle([44, 35, 59, 50], fill=(60, 50, 40, 255))
-    # Gunpowder slot
-    draw.rectangle([62, 35, 77, 50], fill=(60, 50, 40, 255))
-    # Star slots (8)
-    for i in range(8):
-        sx, sy = 98 + (i%4)*18, 17 + (i//4)*18
-        draw.rectangle([sx, sy, sx+15, sy+15], fill=(60, 50, 40, 255))
-    # Result slot
-    draw.rectangle([152, 35, 167, 50], fill=(60, 50, 40, 255))
-    # Player inventory area
-    draw.rectangle([7, 83, 168, 165], fill=(50, 42, 35, 255))
-
-# === Generate All ===
-
-base = "src/main/resources/assets/pyrotechnics/textures"
-
-textures = {
-    f"{base}/block/color_vat_top.png": make_color_vat_top(),
-    f"{base}/block/color_vat.png": make_color_vat_side(),
-    f"{base}/block/effect_bench_top.png": make_effect_bench_top(),
-    f"{base}/block/effect_bench.png": make_effect_bench_side(),
-    f"{base}/block/assembly_bench_top.png": make_assembly_bench_top(),
-    f"{base}/block/assembly_bench.png": make_assembly_bench_side(),
-    f"{base}/gui/color_vat.png": make_gui(176, 207, (100, 85, 65), draw_color_vat_gui),
-    f"{base}/gui/effect_bench.png": make_gui(176, 174, (110, 92, 70), draw_effect_bench_gui),
-    f"{base}/gui/assembly_bench.png": make_gui(176, 174, (115, 95, 72), draw_assembly_bench_gui),
+SCENES = {
+    "gui/assembly_bench.png": {
+        "size": (176, 174),
+        "elements": [
+            {"type": "window"},
+            {"type": "slot", "x": 44, "y": 35},      # paper
+            {"type": "slot", "x": 62, "y": 35},      # gunpowder
+            {"type": "slot_grid", "x": 98, "y": 17, "cols": 4, "rows": 2},  # 8 stars
+            {"type": "slot", "x": 152, "y": 35},     # result
+            {"type": "player_inv", "y": 84},
+        ],
+    },
+    "gui/effect_bench.png": {
+        "size": (176, 174),
+        "elements": [
+            {"type": "window"},
+            {"type": "slot", "x": 44, "y": 35},      # star input
+            {"type": "slot", "x": 26, "y": 57},      # shape modifier
+            {"type": "slot", "x": 62, "y": 57},      # diamond (trail)
+            {"type": "slot", "x": 80, "y": 57},      # glowstone (twinkle)
+            {"type": "slot", "x": 134, "y": 35},     # result
+            {"type": "player_inv", "y": 84},
+        ],
+    },
+    "gui/color_vat.png": {
+        "size": (176, 207),
+        "elements": [
+            {"type": "window"},
+            {"type": "slot_grid", "x": 26, "y": 17, "cols": 4, "rows": 4},  # 16 dyes
+            {"type": "slot", "x": 26, "y": 93},      # gunpowder
+            {"type": "slot", "x": 134, "y": 53},     # result
+            {"type": "label", "x": 62, "y": 78, "text": "Base"},
+            {"type": "label", "x": 110, "y": 78, "text": "Fade"},
+            {"type": "player_inv", "y": 125},
+        ],
+    },
 }
 
-for path, img in textures.items():
+# ── Generate ──────────────────────────────────────────────────────
+
+BASE = "src/main/resources/assets/pyrotechnics/textures"
+
+block_textures = {
+    f"{BASE}/block/color_vat_top.png":      make_color_vat_top(),
+    f"{BASE}/block/color_vat.png":          make_color_vat_side(),
+    f"{BASE}/block/effect_bench_top.png":   make_effect_bench_top(),
+    f"{BASE}/block/effect_bench.png":       make_effect_bench_side(),
+    f"{BASE}/block/assembly_bench_top.png": make_assembly_bench_top(),
+    f"{BASE}/block/assembly_bench.png":     make_assembly_bench_side(),
+}
+
+for path, img in block_textures.items():
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     img.save(path)
-    print(f"  {path}  ({img.size[0]}x{img.size[1]})")
+    print(f"  {path}  ({img.size[0]}×{img.size[1]})")
+
+for filename, scene in SCENES.items():
+    path = f"{BASE}/{filename}"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    img = render(scene)
+    img.save(path)
+    print(f"  {path}  ({img.size[0]}×{img.size[1]})")
 
 print("Done!")
