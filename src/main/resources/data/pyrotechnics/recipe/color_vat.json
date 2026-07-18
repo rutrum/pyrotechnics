@@ -1,1 +1,13 @@
-{"block.color_vat": {"pattern": ["PCP","P P","PPP"],"key": {"P": "#minecraft:planks","C": "minecraft:copper_ingot"},"type": "minecraft:crafting_shaped","result": {"id": "pyrotechnics:color_vat","count": 1},"show_notification": false}}
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["PCP","P P","PPP"],
+  "key": {
+    "P": "#minecraft:planks",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "pyrotechnics:color_vat",
+    "count": 1
+  },
+  "show_notification": false
+}

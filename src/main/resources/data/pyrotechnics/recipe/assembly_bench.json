@@ -1,1 +1,13 @@
-{"block.assembly_bench": {"pattern": ["PGP","P P","PPP"],"key": {"P": "#minecraft:planks","G": "minecraft:gunpowder"},"type": "minecraft:crafting_shaped","result": {"id": "pyrotechnics:assembly_bench","count": 1},"show_notification": false}}
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["PGP","P P","PPP"],
+  "key": {
+    "P": "#minecraft:planks",
+    "G": "minecraft:gunpowder"
+  },
+  "result": {
+    "id": "pyrotechnics:assembly_bench",
+    "count": 1
+  },
+  "show_notification": false
+}

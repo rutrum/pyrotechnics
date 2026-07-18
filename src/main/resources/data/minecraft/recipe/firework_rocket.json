@@ -7,8 +7,8 @@
   "type": "minecraft:campfire_cooking",
   "cookingtime": 1,
   "experience": 0,
-  "ingredient": {
-    "item": "minecraft:barrier"
-  },
-  "result": "minecraft:barrier"
+  "ingredient": "minecraft:barrier",
+  "result": {
+    "id": "minecraft:barrier"
+  }
 }
