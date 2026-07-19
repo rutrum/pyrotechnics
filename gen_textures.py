@@ -27,10 +27,10 @@ C = {
     "bg":           (198, 198, 198),   # container background fill
     "outer_light":  (255, 255, 255),   # top/left border bevel
     "outer_dark":   ( 85,  85,  85),   # bottom/right border bevel
-    "inner_border": (139, 139, 139),   # band between border and slots
-    "slot_bg":      ( 55,  55,  55),   # dark slot interior
-    "slot_light":   ( 85,  85,  85),   # slot bevel top/left (sunken)
-    "slot_dark":    (139, 139, 139),   # slot bevel bottom/right
+    "slot_bg":      (139, 139, 139),   # dark slot interior
+    "inner_border": ( 55,  55,  55),   # band between border and slots
+    "slot_light":   (255, 255, 255),   # slot bevel top/left (sunken)
+    "slot_dark":    ( 55,  55,  55),   # slot bevel bottom/right
 }
 
 
@@ -55,7 +55,7 @@ def bevel_box(draw, x, y, w, h, top_left, bottom_right, fill=None):
     # Fill the interior (inside the border)
     if fill:
         draw.rectangle([x + 1, y + 1, x + w - 2, y + h - 2], fill=fill)
-    
+
     # Draw full border rectangle (all 4 edges)
     draw.rectangle([x, y, x + w - 1, y + h - 1], outline=top_left)
     # Overwrite bottom and right edges with darker color
@@ -80,7 +80,11 @@ def window(draw, img, w, h):
 
 def slot(draw, img, x, y, w=18, h=18):
     """Draw one sunken slot at (x, y) with size wxh."""
-    bevel_box(draw, x, y, w, h, C["slot_light"], C["slot_dark"], C["slot_bg"])
+
+    draw.rectangle([x, y, x + w - 1, y + h - 1], fill=C["slot_bg"]) # corners
+    draw.rectangle([x, y, x + w - 2, y + h - 2], fill=C["slot_dark"])
+    draw.rectangle([x + 1, y + 1, x + w - 1, y + h - 1], fill=C["slot_light"])
+    draw.rectangle([x + 1, y+1, x + w - 2, y + h - 2], fill=C["slot_bg"])
 
 
 def output_slot(draw, img, x, y):
@@ -97,7 +101,7 @@ def slot_grid(draw, img, x, y, cols, rows, dx=18, dy=18):
 
 def arrow(draw, img, x, y, filled=False):
     """Draw a furnace‑style fuel/arrow indicator.
-    
+
     Unfilled = empty arrow outline.
     Filled   = solid arrow (for progress overlay).
     """
