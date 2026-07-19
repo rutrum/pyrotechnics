@@ -222,6 +222,8 @@ public class EffectBenchMenu extends AbstractContainerMenu {
                     if (!this.moveItemStackTo(originalStack, GLOWSTONE_SLOT, GLOWSTONE_SLOT + 1, false)) {
                         return ItemStack.EMPTY;
                     }
+                } else {
+                    return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(originalStack, newStack);
             }

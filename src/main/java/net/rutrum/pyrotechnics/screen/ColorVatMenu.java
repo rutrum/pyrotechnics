@@ -204,6 +204,8 @@ public class ColorVatMenu extends AbstractContainerMenu {
                 } else if (getDyeColor(originalStack) != null) {
                     if (!moveItemStackTo(originalStack, DYE_START, DYE_END + 1, false))
                         return ItemStack.EMPTY;
+                } else {
+                    return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(originalStack, newStack);
             }

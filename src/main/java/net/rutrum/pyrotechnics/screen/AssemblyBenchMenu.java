@@ -193,6 +193,8 @@ public class AssemblyBenchMenu extends AbstractContainerMenu {
                     if (!this.moveItemStackTo(originalStack, STAR_SLOT_START, STAR_SLOT_END + 1, false)) {
                         return ItemStack.EMPTY;
                     }
+                } else {
+                    return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(originalStack, newStack);
             }
